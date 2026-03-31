@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 /**
  * User-Agent string helpers.
  *
@@ -6,5 +7,5 @@
  */
 
 export function getClaudeCodeUserAgent(): string {
-  return `claude-code/${MACRO.VERSION}`
+  return `claude-code/${getAppVersion()}`
 }

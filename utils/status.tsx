@@ -244,7 +244,8 @@ export function buildAPIProviderProperties(): Property[] {
     const providerLabel = {
       bedrock: 'AWS Bedrock',
       vertex: 'Google Vertex AI',
-      foundry: 'Microsoft Foundry'
+      foundry: 'Microsoft Foundry',
+      openrouter: 'OpenRouter'
     }[apiProvider];
     properties.push({
       label: 'API provider',
@@ -320,6 +321,14 @@ export function buildAPIProviderProperties(): Property[] {
         value: 'Microsoft Foundry auth skipped'
       });
     }
+  } else if (apiProvider === 'openrouter') {
+    const openrouterBase =
+      process.env.OPENROUTER_BASE_URL?.replace(/\/$/, '') ||
+      'https://openrouter.ai/api';
+    properties.push({
+      label: 'OpenRouter base URL',
+      value: openrouterBase
+    });
   }
   const proxyUrl = getProxyUrl();
   if (proxyUrl) {

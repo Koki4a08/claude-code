@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS, logEvent } from 'src/services/analytics/index.js';
@@ -53,7 +54,7 @@ export function AutoUpdater({
       logForDebugging('AutoUpdater: Skipping update check in test/dev environment');
       return;
     }
-    const currentVersion = MACRO.VERSION;
+    const currentVersion = getAppVersion();
     const channel = getInitialSettings()?.autoUpdatesChannel ?? 'latest';
     let latestVersion = await getLatestVersion(channel);
     const isDisabled = isAutoUpdaterDisabled();

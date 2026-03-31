@@ -115,7 +115,8 @@ export function isAnthropicAuthEnabled(): boolean {
   const is3P =
     isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) ||
     isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY) ||
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENROUTER)
 
   // Check if user has configured an external API key source
   // This allows externally-provided API keys to work (without requiring proxy configuration)
@@ -207,9 +208,28 @@ export function getAuthTokenSource() {
 
 export type ApiKeySource =
   | 'ANTHROPIC_API_KEY'
+  | 'OPENROUTER_API_KEY'
   | 'apiKeyHelper'
   | '/login managed key'
   | 'none'
+
+/**
+ * OpenRouter API key when CLAUDE_CODE_USE_OPENROUTER is set.
+ * Separate from Anthropic keys — do not use ANTHROPIC_API_KEY for OpenRouter.
+ */
+export function getOpenRouterApiKeyWithSource(): {
+  key: string | null
+  source: 'OPENROUTER_API_KEY' | 'none'
+} {
+  if (!isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENROUTER)) {
+    return { key: null, source: 'none' }
+  }
+  const key = process.env.OPENROUTER_API_KEY
+  if (key) {
+    return { key, source: 'OPENROUTER_API_KEY' }
+  }
+  return { key: null, source: 'none' }
+}
 
 export function getAnthropicApiKey(): null | string {
   const { key } = getAnthropicApiKeyWithSource()
@@ -1594,7 +1614,8 @@ export function is1PApiCustomer(): boolean {
   if (
     isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) ||
     isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY) ||
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENROUTER)
   ) {
     return false
   }
@@ -1728,12 +1749,13 @@ export function getSubscriptionName(): string {
   }
 }
 
-/** Check if using third-party services (Bedrock or Vertex or Foundry) */
+/** Check if using third-party services (Bedrock or Vertex or Foundry or OpenRouter) */
 export function isUsing3PServices(): boolean {
   return !!(
     isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) ||
     isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY) ||
+    isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENROUTER)
   )
 }
 
@@ -1862,6 +1884,14 @@ export type UserAccountInfo = {
 
 export function getAccountInformation() {
   const apiProvider = getAPIProvider()
+  if (apiProvider === 'openrouter') {
+    const accountInfo: UserAccountInfo = {}
+    const { key, source } = getOpenRouterApiKeyWithSource()
+    if (key) {
+      accountInfo.apiKeySource = source
+    }
+    return accountInfo
+  }
   // Only provide account info for first-party Anthropic API
   if (apiProvider !== 'firstParty') {
     return undefined

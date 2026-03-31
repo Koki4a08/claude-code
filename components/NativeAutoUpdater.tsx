@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { logEvent } from 'src/services/analytics/index.js';
@@ -89,12 +90,12 @@ export function NativeAutoUpdater({
     try {
       // Check if current version is above the max allowed version
       const maxVersion = await getMaxVersion();
-      if (maxVersion && gt(MACRO.VERSION, maxVersion)) {
+      if (maxVersion && gt(getAppVersion(), maxVersion)) {
         const msg = await getMaxVersionMessage();
         setMaxVersionIssue(msg ?? 'affects your version');
       }
       const result = await installLatest(channel);
-      const currentVersion = MACRO.VERSION;
+      const currentVersion = getAppVersion();
       const latencyMs = Date.now() - startTime;
 
       // Handle lock contention gracefully - just return without treating as error

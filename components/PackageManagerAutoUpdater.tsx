@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import { c as _c } from "react/compiler-runtime";
 import * as React from 'react';
 import { useState } from 'react';
@@ -37,17 +38,17 @@ export function PackageManagerAutoUpdater(t0) {
       const maxVersion = await getMaxVersion();
       if (maxVersion && latest && gt(latest, maxVersion)) {
         logForDebugging(`PackageManagerAutoUpdater: maxVersion ${maxVersion} is set, capping update from ${latest} to ${maxVersion}`);
-        if (gte(MACRO.VERSION, maxVersion)) {
-          logForDebugging(`PackageManagerAutoUpdater: current version ${MACRO.VERSION} is already at or above maxVersion ${maxVersion}, skipping update`);
+        if (gte(getAppVersion(), maxVersion)) {
+          logForDebugging(`PackageManagerAutoUpdater: current version ${getAppVersion()} is already at or above maxVersion ${maxVersion}, skipping update`);
           setUpdateAvailable(false);
           return;
         }
         latest = maxVersion;
       }
-      const hasUpdate = latest && !gte(MACRO.VERSION, latest) && !shouldSkipVersion(latest);
+      const hasUpdate = latest && !gte(getAppVersion(), latest) && !shouldSkipVersion(latest);
       setUpdateAvailable(!!hasUpdate);
       if (hasUpdate) {
-        logForDebugging(`PackageManagerAutoUpdater: Update available ${MACRO.VERSION} -> ${latest}`);
+        logForDebugging(`PackageManagerAutoUpdater: Update available ${getAppVersion()} -> ${latest}`);
       }
     };
     $[0] = t1;
@@ -76,7 +77,7 @@ export function PackageManagerAutoUpdater(t0) {
   const updateCommand = packageManager === "homebrew" ? "brew upgrade claude-code" : packageManager === "winget" ? "winget upgrade Anthropic.ClaudeCode" : packageManager === "apk" ? "apk upgrade claude-code" : "your package manager update command";
   let t4;
   if ($[3] !== verbose) {
-    t4 = verbose && <Text dimColor={true} wrap="truncate">currentVersion: {MACRO.VERSION}</Text>;
+    t4 = verbose && <Text dimColor={true} wrap="truncate">currentVersion: {getAppVersion()}</Text>;
     $[3] = verbose;
     $[4] = t4;
   } else {

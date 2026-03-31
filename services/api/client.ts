@@ -6,6 +6,7 @@ import {
   getAnthropicApiKey,
   getApiKeyFromApiKeyHelper,
   getClaudeAIOAuthTokens,
+  getOpenRouterApiKeyWithSource,
   isClaudeAISubscriber,
   refreshAndGetAwsCredentials,
   refreshGcpCredentialsIfNeeded,
@@ -28,6 +29,8 @@ import {
   getVertexRegionForModel,
   isEnvTruthy,
 } from '../../utils/envUtils.js'
+
+const DEFAULT_OPENROUTER_BASE_URL = 'https://openrouter.ai/api'
 
 /**
  * Environment variables for different client types:
@@ -132,7 +135,10 @@ export async function getAnthropicClient({
   await checkAndRefreshOAuthTokenIfNeeded()
   logForDebugging('[API:auth] OAuth token check complete')
 
-  if (!isClaudeAISubscriber()) {
+  if (
+    !isClaudeAISubscriber() &&
+    !isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENROUTER)
+  ) {
     await configureApiKeyHeaders(defaultHeaders, getIsNonInteractiveSession())
   }
 
@@ -295,6 +301,27 @@ export async function getAnthropicClient({
     }
     // we have always been lying about the return type - this doesn't support batching or models
     return new AnthropicVertex(vertexArgs) as unknown as Anthropic
+  }
+
+  if (isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENROUTER)) {
+    const { key: openrouterKey } = getOpenRouterApiKeyWithSource()
+    const referer = process.env.OPENROUTER_HTTP_REFERER
+    const title = process.env.OPENROUTER_APP_TITLE
+    const openrouterHeaders = {
+      ...defaultHeaders,
+      ...(referer ? { 'HTTP-Referer': referer } : {}),
+      ...(title ? { 'X-Title': title } : {}),
+    }
+    const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
+      apiKey: apiKey || openrouterKey || '',
+      baseURL:
+        process.env.OPENROUTER_BASE_URL?.replace(/\/$/, '') ||
+        DEFAULT_OPENROUTER_BASE_URL,
+      ...ARGS,
+      defaultHeaders: openrouterHeaders,
+      ...(isDebugToStdErr() && { logger: createStderrLogger() }),
+    }
+    return new Anthropic(clientConfig)
   }
 
   // Determine authentication method based on available tokens

@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 import { execa } from 'execa'
 import memoize from 'lodash-es/memoize.js'
 import { getSessionId } from '../bootstrap/state.js'
@@ -105,7 +106,7 @@ export const getCoreUserData = memoize(
       deviceId,
       sessionId: getSessionId(),
       email: getEmail(),
-      appVersion: MACRO.VERSION,
+      appVersion: getAppVersion(),
       platform: getHostPlatformForAnalytics(),
       organizationUuid,
       accountUuid,

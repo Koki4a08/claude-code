@@ -1,3 +1,4 @@
+import { getAppVersion } from '../../utils/appVersion.js'
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 /**
  * Shared event metadata enrichment for analytics systems
@@ -564,7 +565,7 @@ function getAgentIdentification(): {
  * Extract base version from full version string. "2.0.36-dev.20251107.t174150.sha2709699" → "2.0.36-dev"
  */
 const getVersionBase = memoize((): string | undefined => {
-  const match = MACRO.VERSION.match(/^\d+\.\d+\.\d+(?:-[a-z]+)?/)
+  const match = getAppVersion().match(/^\d+\.\d+\.\d+(?:-[a-z]+)?/)
   return match ? match[0] : undefined
 })
 
@@ -617,7 +618,7 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     isGithubAction: isEnvTruthy(process.env.GITHUB_ACTIONS),
     isClaudeCodeAction: isEnvTruthy(process.env.CLAUDE_CODE_ACTION),
     isClaudeAiAuth: isClaudeAISubscriber(),
-    version: MACRO.VERSION,
+    version: getAppVersion(),
     versionBase: getVersionBase(),
     buildTime: MACRO.BUILD_TIME,
     deploymentEnvironment: env.detectDeploymentEnvironment(),

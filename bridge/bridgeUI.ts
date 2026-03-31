@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import chalk from 'chalk'
 import { toString as qrToString } from 'qrcode'
 import {
@@ -299,7 +300,7 @@ export function createBridgeLogger(options: {
       regenerateQr(connectUrl)
 
       if (verbose) {
-        write(chalk.dim(`Remote Control`) + ` v${MACRO.VERSION}\n`)
+        write(chalk.dim(`Remote Control`) + ` v${getAppVersion()}\n`)
       }
       if (verbose) {
         if (config.spawnMode !== 'single-session') {

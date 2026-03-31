@@ -30,9 +30,11 @@ export function buildQueryConfig(): QueryConfig {
   return {
     sessionId: getSessionId(),
     gates: {
-      streamingToolExecution: checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-        'tengu_streaming_tool_execution2',
-      ),
+      streamingToolExecution:
+        isEnvTruthy(process.env.CLAUDE_CODE_STREAMING_TOOL_EXECUTION) ||
+        checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
+          'tengu_streaming_tool_execution2',
+        ),
       emitToolUseSummaries: isEnvTruthy(
         process.env.CLAUDE_CODE_EMIT_TOOL_USE_SUMMARIES,
       ),

@@ -21,6 +21,7 @@
  * - proxy/mTLS/unix socket configured (preconnect would use wrong transport —
  *   the SDK passes a custom dispatcher/agent that doesn't share the global pool)
  * - Bedrock/Vertex/Foundry (different endpoints, different auth)
+ * - OpenRouter uses its own base URL when CLAUDE_CODE_USE_OPENROUTER is set
  */
 
 import { getOauthConfig } from '../constants/oauth.js'
@@ -56,8 +57,10 @@ export function preconnectAnthropicApi(): void {
   // Use configured base URL (staging, local, or custom gateway). Covers
   // ANTHROPIC_BASE_URL env + USE_STAGING_OAUTH + USE_LOCAL_OAUTH in one lookup.
   // NODE_EXTRA_CA_CERTS no longer a skip — init.ts applied it before this fires.
-  const baseUrl =
-    process.env.ANTHROPIC_BASE_URL || getOauthConfig().BASE_API_URL
+  const baseUrl = isEnvTruthy(process.env.CLAUDE_CODE_USE_OPENROUTER)
+    ? process.env.OPENROUTER_BASE_URL?.replace(/\/$/, '') ||
+      'https://openrouter.ai/api'
+    : process.env.ANTHROPIC_BASE_URL || getOauthConfig().BASE_API_URL
 
   // Fire and forget. HEAD means no response body — the connection is eligible
   // for keep-alive pool reuse immediately after headers arrive. 10s timeout

@@ -97,7 +97,12 @@ export function onChangeAppState({
     newState.mainLoopModel === null
   ) {
     // Remove from settings
-    updateSettingsForSource('userSettings', { model: undefined })
+    const { error } = updateSettingsForSource('userSettings', {
+      model: undefined,
+    })
+    if (error) {
+      logError(error)
+    }
     setMainLoopModelOverride(null)
   }
 
@@ -107,7 +112,12 @@ export function onChangeAppState({
     newState.mainLoopModel !== null
   ) {
     // Save to settings
-    updateSettingsForSource('userSettings', { model: newState.mainLoopModel })
+    const { error } = updateSettingsForSource('userSettings', {
+      model: newState.mainLoopModel,
+    })
+    if (error) {
+      logError(error)
+    }
     setMainLoopModelOverride(newState.mainLoopModel)
   }
 

@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 import { feature } from 'bun:bundle'
 import type { UUID } from 'crypto'
 import type { Dirent } from 'fs'
@@ -94,9 +95,9 @@ import { jsonParse, jsonStringify } from './slowOperations.js'
 import type { ContentReplacementRecord } from './toolResultStorage.js'
 import { validateUuid } from './uuid.js'
 
-// Cache MACRO.VERSION at module level to work around bun --define bug in async contexts
+// Cache getAppVersion() at module level to work around bun --define bug in async contexts
 // See: https://github.com/oven-sh/bun/issues/26168
-const VERSION = typeof MACRO !== 'undefined' ? MACRO.VERSION : 'unknown'
+const VERSION = getAppVersion()
 
 type Transcript = (
   | UserMessage

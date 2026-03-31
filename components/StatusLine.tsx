@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import { feature } from 'bun:bundle';
 import * as React from 'react';
 import { memo, useCallback, useEffect, useRef } from 'react';
@@ -76,7 +77,7 @@ function buildStatusLineCommandInput(permissionMode: PermissionMode, exceeds200k
       project_dir: getOriginalCwd(),
       added_dirs: addedDirs
     },
-    version: MACRO.VERSION,
+    version: getAppVersion(),
     output_style: {
       name: outputStyleName
     },

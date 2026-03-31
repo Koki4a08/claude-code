@@ -92,6 +92,9 @@ export const NotebookEditTool = buildTool({
   searchHint: 'edit Jupyter notebook cells (.ipynb)',
   maxResultSizeChars: 100_000,
   shouldDefer: true,
+  isConcurrencySafe() {
+    return true
+  },
   async description() {
     return DESCRIPTION
   },

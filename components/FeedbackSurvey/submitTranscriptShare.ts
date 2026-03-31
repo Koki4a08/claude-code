@@ -1,3 +1,4 @@
+import { getAppVersion } from '../../utils/appVersion.js'
 import axios from 'axios'
 import { readFile, stat } from 'fs/promises'
 import type { Message } from '../../types/message.js'
@@ -59,7 +60,7 @@ export async function submitTranscriptShare(
 
     const data = {
       trigger,
-      version: MACRO.VERSION,
+      version: getAppVersion(),
       platform: process.platform,
       transcript,
       subagentTranscripts:

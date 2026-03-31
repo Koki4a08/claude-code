@@ -103,7 +103,7 @@ export function modelSupportsISP(model: string): boolean {
   if (provider === 'foundry') {
     return true
   }
-  if (provider === 'firstParty') {
+  if (provider === 'firstParty' || provider === 'openrouter') {
     return !canonical.includes('claude-3-')
   }
   return (
@@ -128,7 +128,7 @@ export function modelSupportsContextManagement(model: string): boolean {
   if (provider === 'foundry') {
     return true
   }
-  if (provider === 'firstParty') {
+  if (provider === 'firstParty' || provider === 'openrouter') {
     return !canonical.includes('claude-3-')
   }
   return (
@@ -142,8 +142,12 @@ export function modelSupportsContextManagement(model: string): boolean {
 export function modelSupportsStructuredOutputs(model: string): boolean {
   const canonical = getCanonicalName(model)
   const provider = getAPIProvider()
-  // Structured outputs only supported on firstParty and Foundry (not Bedrock/Vertex yet)
-  if (provider !== 'firstParty' && provider !== 'foundry') {
+  // Structured outputs: firstParty, Foundry, OpenRouter (Anthropic API). Not Bedrock/Vertex yet.
+  if (
+    provider !== 'firstParty' &&
+    provider !== 'foundry' &&
+    provider !== 'openrouter'
+  ) {
     return false
   }
   return (
@@ -214,7 +218,9 @@ export function getToolSearchBetaHeader(): string {
  */
 export function shouldIncludeFirstPartyOnlyBetas(): boolean {
   return (
-    (getAPIProvider() === 'firstParty' || getAPIProvider() === 'foundry') &&
+    (getAPIProvider() === 'firstParty' ||
+      getAPIProvider() === 'foundry' ||
+      getAPIProvider() === 'openrouter') &&
     !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS)
   )
 }

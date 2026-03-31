@@ -1,4 +1,23 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import { feature } from 'bun:bundle';
+
+// Inject MACRO shim for source (non-bundled) runs.
+// Release bundles inject MACRO at build time; `bun entrypoints/cli.tsx` has no
+// build step, so MACRO is undefined. All references to MACRO.xxx inside functions
+// would throw ReferenceError without this shim. This block runs before any dynamic
+// import (including main.js), so all subsequently loaded modules see a valid MACRO.
+// eslint-disable-next-line custom-rules/no-top-level-side-effects
+if (typeof MACRO === 'undefined') {
+  ;(globalThis as any).MACRO = {
+    VERSION: 'dev',
+    BUILD_TIME: undefined as string | undefined,
+    PACKAGE_URL: '@anthropic-ai/claude-code',
+    NATIVE_PACKAGE_URL: '@anthropic-ai/claude-code',
+    FEEDBACK_CHANNEL: 'https://github.com/anthropics/claude-code/issues',
+    ISSUES_EXPLAINER: 'open an issue at https://github.com/anthropics/claude-code/issues',
+    VERSION_CHANGELOG: '',
+  }
+}
 
 // Bugfix for corepack auto-pinning, which adds yarnpkg to peoples' package.jsons
 // eslint-disable-next-line custom-rules/no-top-level-side-effects
@@ -35,9 +54,10 @@ async function main(): Promise<void> {
 
   // Fast-path for --version/-v: zero module loading needed
   if (args.length === 1 && (args[0] === '--version' || args[0] === '-v' || args[0] === '-V')) {
-    // MACRO.VERSION is inlined at build time
+    // MACRO.VERSION is injected in release bundles; source runs use getAppVersion() → 'dev'.
+    const version = getAppVersion();
     // biome-ignore lint/suspicious/noConsole:: intentional console output
-    console.log(`${MACRO.VERSION} (Claude Code)`);
+    console.log(`${version} (Claude Code)`);
     return;
   }
 
@@ -52,6 +72,10 @@ async function main(): Promise<void> {
   // Ant-only: eliminated from external builds via feature flag.
   if (feature('DUMP_SYSTEM_PROMPT') && args[0] === '--dump-system-prompt') {
     profileCheckpoint('cli_dump_system_prompt_path');
+    const {
+      applySessionEnvFromCliArgv
+    } = await import('../utils/cliSessionEnv.js');
+    applySessionEnvFromCliArgv(process.argv);
     const {
       enableConfigs
     } = await import('../utils/config.js');

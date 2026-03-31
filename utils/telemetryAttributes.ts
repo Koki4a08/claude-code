@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 import type { Attributes } from '@opentelemetry/api'
 import { getSessionId } from 'src/bootstrap/state.js'
 import { getOauthAccountInfo } from './auth.js'
@@ -38,7 +39,7 @@ export function getTelemetryAttributes(): Attributes {
     attributes['session.id'] = sessionId
   }
   if (shouldIncludeAttribute('OTEL_METRICS_INCLUDE_VERSION')) {
-    attributes['app.version'] = MACRO.VERSION
+    attributes['app.version'] = getAppVersion()
   }
 
   // Only include OAuth account data when actively using OAuth authentication

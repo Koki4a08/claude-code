@@ -53,12 +53,22 @@ export function buildInheritedCliFlags(options?: {
     flags.push('--dangerously-skip-permissions')
   } else if (permissionMode === 'acceptEdits') {
     flags.push('--permission-mode acceptEdits')
+  } else if (permissionMode === 'auto') {
+    flags.push('--permission-mode auto')
   }
 
   // Propagate --model if explicitly set via CLI
   const modelOverride = getMainLoopModelOverride()
   if (modelOverride) {
     flags.push(`--model ${quote([modelOverride])}`)
+  }
+
+  if (process.env.CLAUDE_CODE_USE_OPENROUTER === '1') {
+    flags.push('--api-provider openrouter')
+  }
+
+  if (process.env.CLAUDE_CODE_DISABLE_WEB_SEARCH === '1') {
+    flags.push('--no-web-search')
   }
 
   // Propagate --settings if set via CLI
@@ -99,8 +109,14 @@ const TEAMMATE_ENV_VARS = [
   'CLAUDE_CODE_USE_BEDROCK',
   'CLAUDE_CODE_USE_VERTEX',
   'CLAUDE_CODE_USE_FOUNDRY',
+  'CLAUDE_CODE_USE_OPENROUTER',
   // Custom API endpoint
   'ANTHROPIC_BASE_URL',
+  'OPENROUTER_API_KEY',
+  'OPENROUTER_BASE_URL',
+  'OPENROUTER_HTTP_REFERER',
+  'OPENROUTER_APP_TITLE',
+  'CLAUDE_CODE_DISABLE_WEB_SEARCH',
   // Config directory override
   'CLAUDE_CONFIG_DIR',
   // CCR marker — teammates need this for CCR-aware code paths. Auth finds

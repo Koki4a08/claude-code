@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 import axios from 'axios'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
@@ -281,12 +282,12 @@ export function getAllReleaseNotes(
  * Also triggers a fetch of the latest changelog if the version has changed.
  *
  * @param lastSeenVersion The last version of release notes the user has seen
- * @param currentVersion The current application version, defaults to MACRO.VERSION
+ * @param currentVersion The current application version, defaults to getAppVersion()
  * @returns An object with hasReleaseNotes and the releaseNotes content
  */
 export async function checkForReleaseNotes(
   lastSeenVersion: string | null | undefined,
-  currentVersion: string = MACRO.VERSION,
+  currentVersion: string = getAppVersion(),
 ): Promise<{ hasReleaseNotes: boolean; releaseNotes: string[] }> {
   // For Ant builds, use VERSION_CHANGELOG bundled at build time
   if (process.env.USER_TYPE === 'ant') {
@@ -334,7 +335,7 @@ export async function checkForReleaseNotes(
  */
 export function checkForReleaseNotesSync(
   lastSeenVersion: string | null | undefined,
-  currentVersion: string = MACRO.VERSION,
+  currentVersion: string = getAppVersion(),
 ): { hasReleaseNotes: boolean; releaseNotes: string[] } {
   // For Ant builds, use VERSION_CHANGELOG bundled at build time
   if (process.env.USER_TYPE === 'ant') {

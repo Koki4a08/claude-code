@@ -88,6 +88,9 @@ export const FileEditTool = buildTool({
   searchHint: 'modify file contents in place',
   maxResultSizeChars: 100_000,
   strict: true,
+  isConcurrencySafe() {
+    return true
+  },
   async description() {
     return 'A tool for editing files'
   },

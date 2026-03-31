@@ -24,6 +24,8 @@ import {
 import {
   type PermissionMode,
   permissionModeFromString,
+  resolveUnconfiguredPermissionMode,
+  SOURCE_CODE_DEFAULT_PERMISSION_MODE,
 } from './PermissionMode.js'
 import { applyPermissionRulesToPermissionContext } from './permissions.js'
 import { loadAllPermissionRulesFromDisk } from './permissionsLoader.js'
@@ -739,6 +741,14 @@ export function initialPermissionModeFromCLI({
     } else {
       orderedModes.push(parsedMode)
     }
+  } else if (
+    SOURCE_CODE_DEFAULT_PERMISSION_MODE === 'bypassPermissions' &&
+    !disableBypassPermissionsMode &&
+    !isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)
+  ) {
+    // Fork: `permissions.defaultMode` in settings (e.g. acceptEdits) must not
+    // override the source-code default — prepend bypass before settings below.
+    orderedModes.push('bypassPermissions')
   }
   if (settings.permissions?.defaultMode) {
     const settingsMode = settings.permissions.defaultMode as PermissionMode
@@ -796,11 +806,13 @@ export function initialPermissionModeFromCLI({
   }
 
   if (!result) {
-    result = { mode: 'default', notification }
-  }
-
-  if (!result) {
-    result = { mode: 'default', notification }
+    result = {
+      mode: resolveUnconfiguredPermissionMode(
+        disableBypassPermissionsMode,
+        isEnvTruthy(process.env.CLAUDE_CODE_REMOTE),
+      ),
+      notification,
+    }
   }
 
   if (feature('TRANSCRIPT_CLASSIFIER') && result.mode === 'auto') {

@@ -139,7 +139,12 @@ function processChunk(str: string): void {
  * Stop capturing early input.
  * Called automatically when input is consumed, or can be called manually.
  */
-export function stopCapturingEarlyInput(): void {
+export function stopCapturingEarlyInput(options?: {
+  /** When true, return stdin to cooked mode. Required when not handing off to Ink
+   *  (e.g. Bun reports stdin TTY but session is classified non-interactive).
+   *  Otherwise Ctrl+C/terminal line discipline stay broken and the shell looks "frozen". */
+  restoreCookedMode?: boolean
+}): void {
   if (!isCapturing) {
     return
   }
@@ -149,6 +154,15 @@ export function stopCapturingEarlyInput(): void {
   if (readableHandler) {
     process.stdin.removeListener('readable', readableHandler)
     readableHandler = null
+  }
+
+  if (options?.restoreCookedMode && process.stdin.isTTY) {
+    try {
+      process.stdin.setRawMode(false)
+    } catch {
+      // ignore
+    }
+    return
   }
 
   // Don't reset stdin state - the REPL's Ink App will manage stdin state.
@@ -188,4 +202,20 @@ export function seedEarlyInput(text: string): void {
  */
 export function isCapturingEarlyInput(): boolean {
   return isCapturing
+}
+
+/**
+ * Force stdin back to cooked mode when no Ink instance is driving the tty.
+ * Setup dialogs may leave raw mode active during the config/MCP gap before REPL mounts,
+ * which on Windows/Cursor looks like a frozen terminal and breaks normal Ctrl+C.
+ */
+export function restoreStdinCookedModeIfTty(): void {
+  if (!process.stdin.isTTY) {
+    return
+  }
+  try {
+    process.stdin.setRawMode(false)
+  } catch {
+    // ignore
+  }
 }

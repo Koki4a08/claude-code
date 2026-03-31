@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
@@ -47,7 +48,7 @@ export async function startMCPServer(
   const server = new Server(
     {
       name: 'claude/tengu',
-      version: MACRO.VERSION,
+      version: getAppVersion(),
     },
     {
       capabilities: {

@@ -1,3 +1,4 @@
+import { getAppVersion } from './utils/appVersion.js'
 import { feature } from 'bun:bundle';
 import { appendFileSync } from 'fs';
 import React from 'react';
@@ -33,7 +34,7 @@ export function completeOnboarding(): void {
   saveGlobalConfig(current => ({
     ...current,
     hasCompletedOnboarding: true,
-    lastOnboardingVersion: MACRO.VERSION
+    lastOnboardingVersion: getAppVersion()
   }));
 }
 export function showDialog<T = void>(root: Root, renderer: (done: (result: T) => void) => React.ReactNode): Promise<T> {

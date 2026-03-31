@@ -1,3 +1,4 @@
+import { getAppVersion } from '../appVersion.js'
 /**
  * Native Installer Implementation
  *
@@ -515,9 +516,9 @@ async function updateLatest(
         `Native installer: maxVersion ${maxVersion} is set, capping update from ${version} to ${maxVersion}`,
       )
       // If we're already at or above maxVersion, skip the update entirely
-      if (gte(MACRO.VERSION, maxVersion)) {
+      if (gte(getAppVersion(), maxVersion)) {
         logForDebugging(
-          `Native installer: current version ${MACRO.VERSION} is already at or above maxVersion ${maxVersion}, skipping update`,
+          `Native installer: current version ${getAppVersion()} is already at or above maxVersion ${maxVersion}, skipping update`,
         )
         logEvent('tengu_native_update_skipped_max_version', {
           latency_ms: Date.now() - startTime,
@@ -537,7 +538,7 @@ async function updateLatest(
   // is invalid (e.g., empty/corrupted from a failed install), or we're running via npx.
   if (
     !forceReinstall &&
-    version === MACRO.VERSION &&
+    version === getAppVersion() &&
     (await versionIsAvailable(version)) &&
     (await isPossibleClaudeBinary(executablePath))
   ) {

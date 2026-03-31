@@ -396,6 +396,29 @@ export const SettingsSchema = lazySchema(() =>
             'model ID (e.g. a Bedrock inference profile ARN). Typically set in managed settings by ' +
             'enterprise administrators.',
         ),
+      customModels: z
+        .array(
+          z.object({
+            id: z
+              .string()
+              .describe('Model id sent to the API (e.g. anthropic/claude-sonnet-4.6, openai/gpt-4o)'),
+            label: z.string().optional().describe('Label in the model picker'),
+            description: z
+              .string()
+              .optional()
+              .describe('Short description shown next to the model'),
+          }),
+        )
+        .optional()
+        .describe(
+          'Additional models to list in the /model picker (custom gateways, OpenRouter routes, etc.)',
+        ),
+      enableWebSearch: z
+        .boolean()
+        .optional()
+        .describe(
+          'When false, disables the built-in Web Search tool. Default: enabled where the API supports it.',
+        ),
       // Whether to automatically approve all MCP servers in the project
       enableAllProjectMcpServers: z
         .boolean()

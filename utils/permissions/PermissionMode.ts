@@ -18,6 +18,31 @@ export {
   type PermissionMode,
 }
 
+/**
+ * Default permission mode when neither CLI flags nor `settings.permissions.defaultMode`
+ * apply. Edit this constant to change fork-wide startup behavior.
+ *
+ * `bypassPermissions` matches `--dangerously-skip-permissions`. Org/policy or
+ * remote sessions may still downgrade — see `resolveUnconfiguredPermissionMode`.
+ */
+export const SOURCE_CODE_DEFAULT_PERMISSION_MODE: PermissionMode =
+  'bypassPermissions'
+
+/** Effective mode for unconfigured launches (policy + remote guards). */
+export function resolveUnconfiguredPermissionMode(
+  disableBypassPermissionsMode: boolean,
+  isRemoteSession: boolean,
+): PermissionMode {
+  let mode = SOURCE_CODE_DEFAULT_PERMISSION_MODE
+  if (
+    mode === 'bypassPermissions' &&
+    (disableBypassPermissionsMode || isRemoteSession)
+  ) {
+    return 'default'
+  }
+  return mode
+}
+
 export const permissionModeSchema = lazySchema(() => z.enum(PERMISSION_MODES))
 export const externalPermissionModeSchema = lazySchema(() =>
   z.enum(EXTERNAL_PERMISSION_MODES),

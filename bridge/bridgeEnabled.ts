@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import { feature } from 'bun:bundle'
 import {
   checkGate_CACHED_OR_BLOCKING,
@@ -165,8 +166,8 @@ export function checkBridgeMinVersion(): string | null {
     const config = getDynamicConfig_CACHED_MAY_BE_STALE<{
       minVersion: string
     }>('tengu_bridge_min_version', { minVersion: '0.0.0' })
-    if (config.minVersion && lt(MACRO.VERSION, config.minVersion)) {
-      return `Your version of Claude Code (${MACRO.VERSION}) is too old for Remote Control.\nVersion ${config.minVersion} or higher is required. Run \`claude update\` to update.`
+    if (config.minVersion && lt(getAppVersion(), config.minVersion)) {
+      return `Your version of Claude Code (${getAppVersion()}) is too old for Remote Control.\nVersion ${config.minVersion} or higher is required. Run \`claude update\` to update.`
     }
   }
   return null

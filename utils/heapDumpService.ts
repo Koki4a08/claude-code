@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 /**
  * Service for heap dump capture.
  * Used by the /heapdump command.
@@ -207,7 +208,7 @@ export async function captureMemoryDiagnostics(
     smapsRollup,
     platform: process.platform,
     nodeVersion: process.version,
-    ccVersion: MACRO.VERSION,
+    ccVersion: getAppVersion(),
   }
 }
 

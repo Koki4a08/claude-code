@@ -32,7 +32,10 @@ import type { REPLHookContext } from '../utils/hooks/postSamplingHooks.js'
 import type { SessionHooksState } from '../utils/hooks/sessionHooks.js'
 import type { ModelSetting } from '../utils/model/model.js'
 import type { DenialTrackingState } from '../utils/permissions/denialTracking.js'
-import type { PermissionMode } from '../utils/permissions/PermissionMode.js'
+import {
+  SOURCE_CODE_DEFAULT_PERMISSION_MODE,
+  type PermissionMode,
+} from '../utils/permissions/PermissionMode.js'
 import { getInitialSettings } from '../utils/settings/settings.js'
 import type { SettingsJson } from '../utils/settings/types.js'
 import { shouldEnableThinkingByDefault } from '../utils/thinking.js'
@@ -463,7 +466,7 @@ export function getDefaultAppState(): AppState {
   const initialMode: PermissionMode =
     teammateUtils.isTeammate() && teammateUtils.isPlanModeRequired()
       ? 'plan'
-      : 'default'
+      : SOURCE_CODE_DEFAULT_PERMISSION_MODE
 
   return {
     settings: getInitialSettings(),

@@ -279,6 +279,7 @@ function getUsingYourToolsSection(enabledTools: Set<string>): string {
       taskToolName
         ? `Break down and manage your work with the ${taskToolName} tool. These tools are helpful for planning your work and helping the user track your progress. Mark each task as completed as soon as you are done with the task. Do not batch up multiple tasks before marking them as completed.`
         : null,
+      `You can call multiple tools in a single response. ALWAYS make independent tool calls in parallel — this is critical for performance. Tools that target different files (reads, edits, writes, searches) can all run concurrently. Only serialize calls when one depends on the output of another.`,
     ].filter(item => item !== null)
     if (items.length === 0) return ''
     return [`# Using your tools`, ...prependBullets(items)].join(`\n`)
@@ -307,7 +308,7 @@ function getUsingYourToolsSection(enabledTools: Set<string>): string {
     taskToolName
       ? `Break down and manage your work with the ${taskToolName} tool. These tools are helpful for planning your work and helping the user track your progress. Mark each task as completed as soon as you are done with the task. Do not batch up multiple tasks before marking them as completed.`
       : null,
-    `You can call multiple tools in a single response. If you intend to call multiple tools and there are no dependencies between them, make all independent tool calls in parallel. Maximize use of parallel tool calls where possible to increase efficiency. However, if some tool calls depend on previous calls to inform dependent values, do NOT call these tools in parallel and instead call them sequentially. For instance, if one operation must complete before another starts, run these operations sequentially instead.`,
+    `You can call multiple tools in a single response. ALWAYS make independent tool calls in parallel — this is critical for performance. Maximize parallel tool calls aggressively: ${FILE_READ_TOOL_NAME}, ${GREP_TOOL_NAME}, ${GLOB_TOOL_NAME}, ${FILE_EDIT_TOOL_NAME} (different files), ${FILE_WRITE_TOOL_NAME} (different files), WebSearch, WebFetch, and ${AGENT_TOOL_NAME} can ALL run concurrently when they target different resources. For example, reading 5 files should be 5 parallel ${FILE_READ_TOOL_NAME} calls, not 5 sequential ones. Editing 3 different files should be 3 parallel ${FILE_EDIT_TOOL_NAME} calls. Only serialize calls when one genuinely depends on the output of another — for instance, you must read a file before editing it, but you can read file A and edit file B in parallel.`,
   ].filter(item => item !== null)
 
   return [`# Using your tools`, ...prependBullets(items)].join(`\n`)

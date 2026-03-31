@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import { execFileSync } from 'child_process'
 import { diffLines } from 'diff'
 import { constants as fsConstants } from 'fs'
@@ -2682,7 +2683,7 @@ export function buildExportData(
   facets: Map<string, SessionFacets>,
   remoteStats?: { hosts: RemoteHostInfo[]; totalCopied: number },
 ): InsightsExport {
-  const version = typeof MACRO !== 'undefined' ? MACRO.VERSION : 'unknown'
+  const version = getAppVersion()
 
   const remote_hosts_collected = remoteStats?.hosts
     .filter(h => h.sessionCount > 0)

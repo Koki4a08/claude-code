@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { randomUUID } from 'crypto'
 import {
@@ -319,7 +320,7 @@ export async function initBridgeCore(
   const rawApi = createBridgeApiClient({
     baseUrl,
     getAccessToken,
-    runnerVersion: MACRO.VERSION,
+    runnerVersion: getAppVersion(),
     onDebug: logForDebugging,
     onAuth401,
     getTrustedDeviceToken,

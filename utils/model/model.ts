@@ -34,7 +34,14 @@ export type ModelName = string
 export type ModelSetting = ModelName | ModelAlias | null
 
 export function getSmallFastModel(): ModelName {
-  return process.env.ANTHROPIC_SMALL_FAST_MODEL || getDefaultHaikuModel()
+  // Optional override for teams that want a cheaper/faster model on auxiliary
+  // paths (hooks, token estimates, etc.) without changing the main REPL model.
+  if (process.env.ANTHROPIC_SMALL_FAST_MODEL) {
+    return process.env.ANTHROPIC_SMALL_FAST_MODEL
+  }
+  // Use the same model the user configured for the session everywhere — no
+  // silent default to Haiku 4.5 on tools/side requests.
+  return getMainLoopModel()
 }
 
 export function isNonCustomOpusModel(model: ModelName): boolean {
@@ -216,6 +223,11 @@ export function getDefaultMainLoopModel(): ModelName {
  */
 export function firstPartyNameToCanonical(name: ModelName): ModelShortName {
   name = name.toLowerCase()
+  // Gateways (e.g. OpenRouter) use dotted minors: claude-sonnet-4.6
+  name = name.replace(
+    /claude-(opus|sonnet|haiku)-(\d)\.(\d)/g,
+    'claude-$1-$2-$3',
+  )
   // Special cases for Claude 4+ models to differentiate versions
   // Order matters: check more specific versions first (4-5 before 4)
   if (name.includes('claude-opus-4-6')) {

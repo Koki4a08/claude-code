@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 import { z } from 'zod/v4'
 import { getFeatureValue_DEPRECATED } from '../services/analytics/growthbook.js'
 import { lazySchema } from '../utils/lazySchema.js'
@@ -146,8 +147,8 @@ export async function getEnvLessBridgeConfig(): Promise<EnvLessBridgeConfig> {
  */
 export async function checkEnvLessBridgeMinVersion(): Promise<string | null> {
   const cfg = await getEnvLessBridgeConfig()
-  if (cfg.min_version && lt(MACRO.VERSION, cfg.min_version)) {
-    return `Your version of Claude Code (${MACRO.VERSION}) is too old for Remote Control.\nVersion ${cfg.min_version} or higher is required. Run \`claude update\` to update.`
+  if (cfg.min_version && lt(getAppVersion(), cfg.min_version)) {
+    return `Your version of Claude Code (${getAppVersion()}) is too old for Remote Control.\nVersion ${cfg.min_version} or higher is required. Run \`claude update\` to update.`
   }
   return null
 }

@@ -1,3 +1,4 @@
+import { getAppVersion } from '../../utils/appVersion.js'
 import { feature } from 'bun:bundle'
 import type {
   Base64ImageSource,
@@ -986,7 +987,7 @@ export const connectToServer = memoize(
         {
           name: 'claude-code',
           title: 'Claude Code',
-          version: MACRO.VERSION ?? 'unknown',
+          version: getAppVersion() ?? 'unknown',
           description: "Anthropic's agentic coding tool",
           websiteUrl: PRODUCT_URL,
         },
@@ -3281,7 +3282,7 @@ export async function setupSdkMcpClients(
         {
           name: 'claude-code',
           title: 'Claude Code',
-          version: MACRO.VERSION ?? 'unknown',
+          version: getAppVersion() ?? 'unknown',
           description: "Anthropic's agentic coding tool",
           websiteUrl: PRODUCT_URL,
         },

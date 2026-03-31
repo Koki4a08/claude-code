@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 import axios from 'axios'
 import { constants as fsConstants } from 'fs'
 import { access, writeFile } from 'fs/promises'
@@ -72,6 +73,11 @@ export async function assertMinVersion(): Promise<void> {
     return
   }
 
+  // Skip version check for source/dev builds (version = 'dev' is not valid semver)
+  if (getAppVersion() === 'dev') {
+    return
+  }
+
   try {
     const versionConfig = await getDynamicConfig_BLOCKS_ON_INIT<{
       minVersion: string
@@ -79,11 +85,11 @@ export async function assertMinVersion(): Promise<void> {
 
     if (
       versionConfig.minVersion &&
-      lt(MACRO.VERSION, versionConfig.minVersion)
+      lt(getAppVersion(), versionConfig.minVersion)
     ) {
       // biome-ignore lint/suspicious/noConsole:: intentional console output
       console.error(`
-It looks like your version of Claude Code (${MACRO.VERSION}) needs an update.
+It looks like your version of Claude Code (${getAppVersion()}) needs an update.
 A newer version (${versionConfig.minVersion} or higher) is required to continue.
 
 To update, please run:
@@ -464,7 +470,7 @@ export async function installGlobalPackage(
     logEvent('tengu_auto_updater_lock_contention', {
       pid: process.pid,
       currentVersion:
-        MACRO.VERSION as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        getAppVersion() as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
     return 'in_progress'
   }
@@ -476,7 +482,7 @@ export async function installGlobalPackage(
       logError(new Error('Windows NPM detected in WSL environment'))
       logEvent('tengu_auto_updater_windows_npm_in_wsl', {
         currentVersion:
-          MACRO.VERSION as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+          getAppVersion() as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
       // biome-ignore lint/suspicious/noConsole:: intentional console output
       console.error(`

@@ -1,5 +1,6 @@
 /* eslint-disable custom-rules/no-process-exit -- CLI subcommand handler intentionally exits */
 
+import { readFileSync } from 'fs'
 import {
   clearAuthRelatedCaches,
   performLogout,
@@ -25,6 +26,7 @@ import {
   getAnthropicApiKeyWithSource,
   getAuthTokenSource,
   getOauthAccountInfo,
+  getOpenRouterApiKeyWithSource,
   getSubscriptionType,
   isUsing3PServices,
   saveOAuthTokensIfNeeded,
@@ -235,17 +237,27 @@ export async function authStatus(opts: {
 }): Promise<void> {
   const { source: authTokenSource, hasToken } = getAuthTokenSource()
   const { source: apiKeySource } = getAnthropicApiKeyWithSource()
+  const { key: openrouterKey, source: openrouterKeySource } =
+    getOpenRouterApiKeyWithSource()
   const hasApiKeyEnvVar =
     !!process.env.ANTHROPIC_API_KEY && !isRunningOnHomespace()
   const oauthAccount = getOauthAccountInfo()
   const subscriptionType = getSubscriptionType()
   const using3P = isUsing3PServices()
+  const hasOpenRouterAuth =
+    openrouterKeySource === 'OPENROUTER_API_KEY' && !!openrouterKey
   const loggedIn =
-    hasToken || apiKeySource !== 'none' || hasApiKeyEnvVar || using3P
+    hasToken ||
+    apiKeySource !== 'none' ||
+    hasApiKeyEnvVar ||
+    using3P ||
+    hasOpenRouterAuth
 
   // Determine auth method
   let authMethod: string = 'none'
-  if (using3P) {
+  if (getAPIProvider() === 'openrouter' && hasOpenRouterAuth) {
+    authMethod = 'openrouter_api_key'
+  } else if (using3P) {
     authMethod = 'third_party'
   } else if (authTokenSource === 'claude.ai') {
     authMethod = 'claude.ai'
@@ -295,9 +307,11 @@ export async function authStatus(opts: {
     const resolvedApiKeySource =
       apiKeySource !== 'none'
         ? apiKeySource
-        : hasApiKeyEnvVar
-          ? 'ANTHROPIC_API_KEY'
-          : null
+        : hasOpenRouterAuth
+          ? 'OPENROUTER_API_KEY'
+          : hasApiKeyEnvVar
+            ? 'ANTHROPIC_API_KEY'
+            : null
     const output: Record<string, string | boolean | null> = {
       loggedIn,
       authMethod,
@@ -326,5 +340,64 @@ export async function authLogout(): Promise<void> {
     process.exit(1)
   }
   process.stdout.write('Successfully logged out from your Anthropic account.\n')
+  process.exit(0)
+}
+
+/**
+ * Persist OpenRouter API key in ~/.claude.json `env` (same mechanism as other
+ * global env overrides). Sets CLAUDE_CODE_USE_OPENROUTER so runs default to
+ * OpenRouter; pass --api-provider anthropic on the CLI to use Anthropic for one session.
+ */
+export async function authOpenRouterSet(opts: {
+  key?: string
+  stdin?: boolean
+}): Promise<void> {
+  let key = opts.key?.trim() ?? ''
+  if (opts.stdin) {
+    try {
+      const fromIn = readFileSync(0, 'utf8').trim()
+      if (fromIn.length > 0) {
+        key = fromIn
+      }
+    } catch {
+      /* empty stdin */
+    }
+  }
+  if (!key && process.env.OPENROUTER_API_KEY) {
+    key = process.env.OPENROUTER_API_KEY.trim()
+  }
+  if (!key) {
+    process.stderr.write(
+      'Error: No API key. Pass it as an argument, set OPENROUTER_API_KEY in the environment, or pipe the key with --stdin.\n',
+    )
+    process.exit(1)
+  }
+
+  saveGlobalConfig(current => ({
+    ...current,
+    env: {
+      ...current.env,
+      OPENROUTER_API_KEY: key,
+      CLAUDE_CODE_USE_OPENROUTER: '1',
+    },
+  }))
+
+  process.stdout.write(
+    'OpenRouter API key saved in global config (~/.claude.json → env). OpenRouter is enabled for new runs; use --api-provider anthropic to force direct Anthropic for one session.\n',
+  )
+  process.exit(0)
+}
+
+/** Remove OpenRouter entries from global config env (does not affect shell-exported OPENROUTER_*). */
+export async function authOpenRouterClear(): Promise<void> {
+  saveGlobalConfig(current => {
+    const nextEnv = { ...current.env }
+    delete nextEnv.OPENROUTER_API_KEY
+    delete nextEnv.CLAUDE_CODE_USE_OPENROUTER
+    return { ...current, env: nextEnv }
+  })
+  process.stdout.write(
+    'Removed OpenRouter credentials from global config env.\n',
+  )
   process.exit(0)
 }

@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 /**
  * Error log sink implementation
  *
@@ -119,7 +120,7 @@ function appendToLog(path: string, message: object): void {
     cwd: getFsImplementation().cwd(),
     userType: process.env.USER_TYPE,
     sessionId: getSessionId(),
-    version: MACRO.VERSION,
+    version: getAppVersion(),
   }
 
   getLogWriter(path).write(messageWithTimestamp)

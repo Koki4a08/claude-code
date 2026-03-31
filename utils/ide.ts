@@ -1,3 +1,4 @@
+import { getAppVersion } from './appVersion.js'
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import axios from 'axios'
 import { execa } from 'execa'
@@ -925,7 +926,7 @@ function getInstallationEnv(): NodeJS.ProcessEnv | undefined {
 }
 
 function getClaudeCodeVersion() {
-  return MACRO.VERSION
+  return getAppVersion()
 }
 
 async function getInstalledVSCodeExtensionVersion(

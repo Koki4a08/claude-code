@@ -1,3 +1,4 @@
+import { getAppVersion } from '../../utils/appVersion.js'
 import { c as _c } from "react/compiler-runtime";
 import figures from 'figures';
 import * as React from 'react';
@@ -22,7 +23,7 @@ function buildPrimarySection(): Property[] {
   const nameValue = customTitle ?? <Text dimColor>/rename to add a name</Text>;
   return [{
     label: 'Version',
-    value: MACRO.VERSION
+    value: getAppVersion()
   }, {
     label: 'Session name',
     value: nameValue

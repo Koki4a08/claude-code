@@ -12,6 +12,7 @@ import { lazySchema } from '../../utils/lazySchema.js'
 import { logError } from '../../utils/log.js'
 import { createUserMessage } from '../../utils/messages.js'
 import { getMainLoopModel, getSmallFastModel } from '../../utils/model/model.js'
+import { isWebSearchGloballyEnabled } from '../../utils/webSearchEnabled.js'
 import { jsonParse, jsonStringify } from '../../utils/slowOperations.js'
 import { asSystemPrompt } from '../../utils/systemPromptType.js'
 import { getWebSearchPrompt, WEB_SEARCH_TOOL_NAME } from './prompt.js'
@@ -166,11 +167,19 @@ export const WebSearchTool = buildTool({
     return summary ? `Searching for ${summary}` : 'Searching the web'
   },
   isEnabled() {
+    if (!isWebSearchGloballyEnabled()) {
+      return false
+    }
     const provider = getAPIProvider()
     const model = getMainLoopModel()
 
     // Enable for firstParty
     if (provider === 'firstParty') {
+      return true
+    }
+
+    // OpenRouter: Anthropic routes may support web search when the upstream model does
+    if (provider === 'openrouter') {
       return true
     }
 

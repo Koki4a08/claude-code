@@ -1,3 +1,4 @@
+import { getAppVersion } from '../utils/appVersion.js'
 // Critical system constants extracted to break circular dependencies
 
 import { feature } from 'bun:bundle'
@@ -75,7 +76,7 @@ export function getAttributionHeader(fingerprint: string): string {
     return ''
   }
 
-  const version = `${MACRO.VERSION}.${fingerprint}`
+  const version = `${getAppVersion()}.${fingerprint}`
   const entrypoint = process.env.CLAUDE_CODE_ENTRYPOINT ?? 'unknown'
 
   // cch=00000 placeholder is overwritten by Bun's HTTP stack with attestation token
